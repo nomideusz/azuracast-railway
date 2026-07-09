@@ -1,37 +1,44 @@
-# AzuraCast on Railway
+# Deploy and Host AzuraCast on Railway
 
 [AzuraCast](https://www.azuracast.com/) is a self-hosted, all-in-one web radio management suite: stream with Icecast, automate playlists with Liquidsoap, broadcast live from your browser with WebDJ, and track listener analytics — all from one dashboard.
 
-This template runs the official all-in-one AzuraCast image as a single Railway service, adapted for Railway's platform:
+## About Hosting AzuraCast
 
-- **Single volume**: AzuraCast normally expects ~10 Docker volumes. A small init script relocates all persistent data (database, station media, uploads, backups) onto one Railway volume mounted at `/data`.
-- **Web-based streaming**: Railway exposes one HTTPS domain per service. After setup, enable **"Use Web Proxy for Radio"** (Administration → System Settings → Services) so listener streams and station management work through your Railway domain without extra ports.
-- **No sidecar updater**: the in-app updater is disabled; update by redeploying the service (the build pulls the latest AzuraCast release).
+AzuraCast normally expects a full Docker Compose stack with ~10 named volumes. This template adapts the official all-in-one image to Railway as a single service: a small init script relocates all persistent data (database, station media, uploads, backups) onto one Railway volume mounted at `/data`, the embedded MariaDB root password is auto-generated, and TLS is terminated by Railway's edge. First boot initializes the database and takes about a minute; after that you land on AzuraCast's setup wizard to create your admin account and first station.
 
-## First-time setup
+## Common Use Cases
 
-1. Deploy the template and wait for the service to become healthy (first boot initializes the database, ~1–2 minutes).
-2. Open your Railway domain — you'll land on the AzuraCast setup wizard to create your admin account and first station.
-3. In **Administration → System Settings → Services**, enable **Use Web Proxy for Radio**.
+- Run an internet radio station with automated playlists, scheduling, and jingles
+- Broadcast live shows from the browser with WebDJ or hand off between rotating DJs
+- Host a podcast/community station with listener analytics and stream history
 
-## Configuration
+## Dependencies for AzuraCast Hosting
 
-| Variable | Purpose |
-|---|---|
-| `MYSQL_ROOT_PASSWORD` | Root password for the embedded MariaDB (generated automatically). |
+- None — MariaDB, Redis, Icecast, and Liquidsoap are all embedded in the single service
 
-The embedded MariaDB and Redis live inside the container and are not exposed publicly.
+### Deployment Dependencies
 
-## Notes & limits
+- [AzuraCast documentation](https://docs.azuracast.com/)
+- [Template source on GitHub](https://github.com/nomideusz/azuracast-railway)
 
-- **Live DJ connections**: browser-based WebDJ works out of the box. Connecting external encoder software (BUTT, Mixxx) over raw Icecast ports requires adding a Railway TCP proxy to the station's port.
+### Implementation Details
+
+After deploying, complete these two steps:
+
+1. Open your Railway domain and finish the setup wizard.
+2. In **Administration → System Settings → Services**, enable **Use Web Proxy for Radio** so listener streams work through your Railway HTTPS domain without extra ports.
+
+How the single-volume adaptation works: `Dockerfile` extends `ghcr.io/azuracast/azuracast:latest` with two init scripts — `00_railway_volumes.sh` symlinks every persistent path (e.g. `/var/lib/mysql`, `/var/azuracast/stations`) into `/data/...` before any service starts, and `99_railway_fixups.sh` re-applies file ownership that stock scripts miss because of the symlinks. The in-app updater is disabled; update by redeploying (each build pulls the latest AzuraCast release).
+
+Notes and limits:
+
+- **Live DJ via external encoders** (BUTT, Mixxx) needs a Railway TCP proxy to the station's Icecast port; browser WebDJ works out of the box.
 - **SFTP uploads** (port 2022) also need a TCP proxy; the web uploader works without one.
-- **Transcoding is CPU-only** (Railway has no GPU) — fine for typical radio bitrates.
-- Volume size is plan-dependent on Railway; a music library needs space, so check your plan's volume cap.
+- **Transcoding is CPU-only** (no GPU on Railway) — fine for typical radio bitrates.
+- Volume size is plan-dependent; a large music library needs a plan with a bigger volume cap.
 
-## How it works
+## Why Deploy AzuraCast on Railway?
 
-`Dockerfile` extends `ghcr.io/azuracast/azuracast:latest` with two init scripts:
+Railway is a singular platform to deploy your infrastructure stack. Railway will host your infrastructure so you don't have to deal with configuration, while allowing you to vertically and horizontally scale it.
 
-- `00_railway_volumes.sh` — runs before any service starts; symlinks every persistent path (e.g. `/var/lib/mysql`, `/var/azuracast/stations`) into `/data/...`, preserving first-boot contents.
-- `99_railway_fixups.sh` — re-applies ownership that stock scripts miss because of the symlinks.
+By deploying AzuraCast on Railway, you are one step closer to supporting a complete full-stack application with minimal burden. Host your servers, databases, AI agents, and more on Railway.
