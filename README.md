@@ -34,6 +34,7 @@ How the single-volume adaptation works: `Dockerfile` extends `ghcr.io/azuracast/
 
 Notes and limits:
 
+- **RAM requirement:** the all-in-one container (MariaDB, Redis, Icecast, Liquidsoap, PHP) needs **at least 1 GB of RAM** — on trial-plan resource limits it will start, then crash once services spin up. Deploy on a plan with 1–2 GB+ available.
 - **Live DJ via external encoders** (BUTT, Mixxx) needs a Railway TCP proxy to the station's Icecast port; browser WebDJ works out of the box.
 - **SFTP uploads** (port 2022) also need a TCP proxy; the web uploader works without one.
 - **Transcoding is CPU-only** (no GPU on Railway) — fine for typical radio bitrates.

@@ -1,0 +1,51 @@
+{
+  "buckets": {},
+  "services": {
+    "7b6a81f5-cbc1-4caa-98c6-0286b5ac0e9d": {
+      "icon": "https://www.azuracast.com/_astro/logo.VgI79CYu_j3OI6.svg",
+      "name": "azuracast",
+      "deploy": {
+        "startCommand": null,
+        "healthcheckPath": "/api/status",
+        "restartPolicyType": "ON_FAILURE",
+        "restartPolicyMaxRetries": 10
+      },
+      "source": {
+        "repo": "https://github.com/nomideusz/azuracast-railway",
+        "rootDirectory": null
+      },
+      "variables": {
+        "PORT": {
+          "isOptional": false,
+          "description": "Port AzuraCast listens on.",
+          "defaultValue": "80"
+        },
+        "MYSQL_ROOT_PASSWORD": {
+          "isOptional": false,
+          "description": "Root password for the embedded MariaDB. Auto-generated — no need to change it.",
+          "defaultValue": "${{secret(32)}}"
+        },
+        "MYSQL_HOST": {
+          "isOptional": false,
+          "description": "Keeps the embedded MariaDB enabled. Don't change.",
+          "defaultValue": "localhost"
+        },
+        "RAILWAY_HEALTHCHECK_TIMEOUT_SEC": {
+          "isOptional": false,
+          "description": "First boot initializes the database and runs migrations; the 5-minute default can expire before that finishes.",
+          "defaultValue": "900"
+        }
+      },
+      "networking": {
+        "serviceDomains": {
+          "<hasDomain>": {}
+        }
+      },
+      "volumeMounts": {
+        "7b6a81f5-cbc1-4caa-98c6-0286b5ac0e9d": {
+          "mountPath": "/data"
+        }
+      }
+    }
+  }
+}
