@@ -44,5 +44,6 @@ link_dir /var/azuracast/storage/rsas          rsas        azuracast:azuracast
 link_dir /var/azuracast/storage/geoip         geoip       azuracast:azuracast
 link_dir /var/azuracast/storage/sftpgo        sftpgo      azuracast:azuracast
 link_dir /var/azuracast/storage/acme          acme        azuracast:azuracast
+link_dir /tmp/liquidsoap_cache                liquidsoap_cache azuracast:azuracast
 
 exit 0

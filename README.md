@@ -25,16 +25,13 @@ AzuraCast normally expects a full Docker Compose stack with ~10 named volumes. T
 
 ### Implementation Details
 
-After deploying, complete these two steps:
+After deploying, open your Railway domain right away and finish the setup wizard: the first visitor creates the admin account. Streams are served through your Railway HTTPS domain (`/listen/<station>/radio.mp3`), so no extra ports are needed.
 
-1. Open your Railway domain and finish the setup wizard.
-2. In **Administration → System Settings → Services**, enable **Use Web Proxy for Radio** so listener streams work through your Railway HTTPS domain without extra ports.
-
-How the single-volume adaptation works: `Dockerfile` extends `ghcr.io/azuracast/azuracast:latest` with two init scripts — `00_railway_volumes.sh` symlinks every persistent path (e.g. `/var/lib/mysql`, `/var/azuracast/stations`) into `/data/...` before any service starts, and `99_railway_fixups.sh` re-applies file ownership that stock scripts miss because of the symlinks. The in-app updater is disabled; update by redeploying (each build pulls the latest AzuraCast release).
+How the single-volume adaptation works: `Dockerfile` extends the official `ghcr.io/azuracast/azuracast` image, pinned to a tested release, with two init scripts — `00_railway_volumes.sh` symlinks every persistent path (e.g. `/var/lib/mysql`, `/var/azuracast/stations`) into `/data/...` before any service starts, and `99_railway_fixups.sh` re-applies file ownership that stock scripts miss because of the symlinks. The in-app updater is disabled; new AzuraCast releases arrive as template updates once tested.
 
 Notes and limits:
 
-- **RAM requirement:** the all-in-one container (MariaDB, Redis, Icecast, Liquidsoap, PHP) needs **at least 1 GB of RAM** — on trial-plan resource limits it will start, then crash once services spin up. Deploy on a plan with 1–2 GB+ available.
+- **RAM requirement:** about 0.4 GB with one station on air, but a station needs **1 GB** to start. The Trial and Hobby plans work; on the Free plan (0.5 GB) the dashboard runs but stations stay offline.
 - **Live DJ via external encoders** (BUTT, Mixxx) needs a Railway TCP proxy to the station's Icecast port; browser WebDJ works out of the box.
 - **SFTP uploads** (port 2022) also need a TCP proxy; the web uploader works without one.
 - **Transcoding is CPU-only** (no GPU on Railway) — fine for typical radio bitrates.
