@@ -21,11 +21,11 @@ AzuraCast normally expects a full Docker Compose stack with ~10 named volumes. T
 ### Deployment Dependencies
 
 - [AzuraCast documentation](https://docs.azuracast.com/)
-- [Template source on GitHub](https://github.com/nomideusz/azuracast-railway)
+- [Template source on GitHub](https://github.com/two-workspaces/azuracast)
 
 ### Implementation Details
 
-After deploying, open your Railway domain right away and finish the setup wizard: the first visitor creates the admin account. Streams are served through your Railway HTTPS domain (`/listen/<station>/radio.mp3`), so no extra ports are needed.
+After deploying, open your Railway domain right away and finish the setup wizard: the first visitor creates the admin account. Streams are served through your Railway HTTPS domain (`/listen/STATION/radio.mp3`), so no extra ports are needed.
 
 How the single-volume adaptation works: `Dockerfile` extends the official `ghcr.io/azuracast/azuracast` image, pinned to a tested release, with two init scripts — `00_railway_volumes.sh` symlinks every persistent path (e.g. `/var/lib/mysql`, `/var/azuracast/stations`) into `/data/...` before any service starts, and `99_railway_fixups.sh` re-applies file ownership that stock scripts miss because of the symlinks. The in-app updater is disabled; new AzuraCast releases arrive as template updates once tested.
 
